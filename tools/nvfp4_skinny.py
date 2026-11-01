@@ -53,6 +53,8 @@ import sys
 
 import torch
 
+from tools.cuda_arch import capability
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # QWEN38_NVFP4_SKINNY=1 routes every NVFP4 projection of 1..32 rows here instead of to v2.
@@ -304,7 +306,10 @@ def scale_runs(s: torch.Tensor) -> torch.Tensor:
 
 
 def use_skinny(M: int) -> bool:
-    return SKINNY and 1 <= M <= SKINNY_MAX
+    if not (SKINNY and 1 <= M <= SKINNY_MAX):
+        return False
+    cap = capability()
+    return cap is not None and cap >= (12, 0)
 
 
 # ------------------------------------------------------------------ gate and bench
